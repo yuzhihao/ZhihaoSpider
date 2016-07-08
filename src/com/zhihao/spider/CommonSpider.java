@@ -7,4 +7,10 @@ public class CommonSpider extends Worker{
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
+	protected boolean checkUrl(String url) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

@@ -19,18 +19,19 @@ import com.zhihao.spider.storage.DataStorage;
 
 
 /**
- * 爬虫工作线程
+ * 爬虫工作线程 抽象类
  * @author dell1
  *
  */
 public abstract class Worker extends Observable implements Runnable{
 	private static final Logger logger = Logger.getLogger(Worker.class.getName());
-	private int threadIndex = 0;
+	
+	protected int threadIndex = 0;
 	//private UrlQueue urlQueue;
-	private Downloader downloader;
-	private HtmlParser parser;
-	private DataStorage store;
-	private ContentChecker checker;
+	protected Downloader downloader;
+	protected HtmlParser parser;
+	protected DataStorage store;
+	protected ContentChecker checker;
 	
 	public Worker(){
 		init();
@@ -39,13 +40,13 @@ public abstract class Worker extends Observable implements Runnable{
 	public Worker(int index ){
 		threadIndex = index;
 		init();
-		
 	}
 	
 	private void init(){
 		downloader = new Downloader();
 		store = new DataStorage();
-		parser = new HtmlParser(store);//parser中需要用到DataStorage
+		//HtmlParser的初始化放在子类中进行
+		
 		checker = new ContentChecker();
 	}
 	
@@ -71,6 +72,7 @@ public abstract class Worker extends Observable implements Runnable{
 		}catch(Exception e){
 			Spider.logger.error("crawl exception");
 			sendMessage("crawl exception");
+			e.printStackTrace();
 		}finally{
 			//run();
 		}
@@ -90,7 +92,10 @@ public abstract class Worker extends Observable implements Runnable{
 			
 			// 抓取URL指定的页面，并返回状态码和页面内容构成的FetchedPage对象
 			HtmlPage htmlPage = downloader.getHtmpPageFromUrl(url);
-			
+			if(htmlPage==null){
+				logger.debug("fetchPage get null");
+				continue;
+			}
 			// 检查爬取页面的合法性，爬虫是否被禁止
 			if(!checker.check(htmlPage)){
 				// 切换IP等操作
@@ -116,5 +121,7 @@ public abstract class Worker extends Observable implements Runnable{
 			}
 		}
 	}
+	
+	abstract protected boolean checkUrl(String url);
 
 }

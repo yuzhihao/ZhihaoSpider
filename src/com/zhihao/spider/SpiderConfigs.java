@@ -2,6 +2,7 @@ package com.zhihao.spider;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class SpiderConfigs {
@@ -19,6 +20,8 @@ public class SpiderConfigs {
 	public static String redisUrl;
 	public static String redisPort;
 	public static String jdbcUrl;
+	public static ArrayList<String> seedUrls = new ArrayList<String>();
+	public static ArrayList<Integer> seedSpiderNums = new ArrayList<Integer>();  
 	
 	static {   
         Properties prop = new Properties();   
@@ -28,8 +31,32 @@ public class SpiderConfigs {
             redisUrl = prop.getProperty("redisUrl").trim();   
             redisPort = prop.getProperty("redisPort").trim(); 
             jdbcUrl = prop.getProperty("jdbcUrl").trim(); 
+            //¥”≈‰÷√÷–∂¡»° seed url
+            readSeedUrls(prop);
+            
         } catch (IOException e) {   
             e.printStackTrace();   
         }   
-    }   
+    }  
+	
+	public static void readSeedUrls( Properties prop){
+		String temp1 = prop.getProperty("url");
+    	if(temp1!=null && temp1!=""){
+    		seedUrls.add(temp1);
+    		String tempNum =  prop.getProperty("num");
+    		if(tempNum!=null && tempNum!=""){
+    			seedSpiderNums.add(Integer.parseInt(tempNum));
+    		}
+    	}
+        for(int i=0;i<=20;i++){
+        	String temp2 = prop.getProperty("url"+i);
+        	if(temp2!=null && temp2!=""){
+        		seedUrls.add(temp2);
+        		String tempNum =  prop.getProperty("num"+i);
+        		if(tempNum!=null && tempNum!=""){
+        			seedSpiderNums.add(Integer.parseInt(tempNum));
+        		}
+        	}
+        }
+	}
 }

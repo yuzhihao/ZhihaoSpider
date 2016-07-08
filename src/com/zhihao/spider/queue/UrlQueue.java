@@ -1,13 +1,14 @@
 package com.zhihao.spider.queue;
 
 import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.zhihao.spider.SpiderConfigs;
 
-public class UrlQueue {
+public class UrlQueue{
 
+	private static LinkedBlockingQueue<Object>  queue2 = new LinkedBlockingQueue<Object>();
 	private static LinkedList<Object>  queue = new LinkedList<Object>();
-	
 	public static synchronized  void enQueue(Object t){
 		//判断queue队列是否超过限制
 		if(queue.size() > SpiderConfigs.MAX_QUEUE){

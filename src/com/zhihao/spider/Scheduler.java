@@ -28,16 +28,44 @@ public class Scheduler implements Observer{
 	public Scheduler(){
 		pool = Executors.newCachedThreadPool();
 		//初始化Spider数组
-		initSpiderList();
-		logger.debug("----------------初始化完成");
+		if(initSpiderList()){
+			logger.info("----------------初始化完成");
+		}else{
+			logger.info("----------------初始化失败");
+		}
+		
 		
 	}
 
-	private void initSpiderList(){
+	/**
+	 * 初始化Spider实例
+	 * @return
+	 */
+	private boolean initSpiderList(){
 		spiderList =  new ArrayList<CommonSpider>();
-		//从配置中读取 
-		spiderList.add(new CommonSpider(0)); //参数为 threadIndex
-		
+		//从配置读取spider数量
+		if(SpiderConfigs.seedSpiderNums.size()!=SpiderConfigs.seedUrls.size()){
+			logger.error("配置文件错误");
+			return false;
+		}
+		//！ 线程的index，实例化Spider时做参数
+		int threadIndex = 0;
+		//！ 遍历seedUrls
+		for(int index=0;index<SpiderConfigs.seedUrls.size();index++){
+			String url = SpiderConfigs.seedUrls.get(index);
+			int num = SpiderConfigs.seedSpiderNums.get(index);
+			for(int j=0;j<num;j++){
+				if(url.contains("douban")){
+					spiderList.add(new DoubanSpider(threadIndex)); 
+					logger.info("---DoubanSpider added");
+				}else{
+					spiderList.add(new CommonSpider(threadIndex)); 
+					logger.info("---CommonSpider added");
+				}
+				threadIndex ++;
+			}
+		}
+		return true;
 	}
 	
 	@Override
@@ -72,7 +100,7 @@ public class Scheduler implements Observer{
 			
 			while(true){
 				for(CommonSpider temp : spiderList){
-			
+					
 				}
 				Thread.sleep(2000);	
 			}

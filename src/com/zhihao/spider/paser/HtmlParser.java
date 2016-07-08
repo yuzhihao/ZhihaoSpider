@@ -1,9 +1,11 @@
 package com.zhihao.spider.paser;
 
+import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
 import com.zhihao.spider.model.HtmlPage;
@@ -12,9 +14,13 @@ import com.zhihao.spider.queue.VisitedQueue;
 import com.zhihao.spider.storage.DataStorage;
 
 
-public class HtmlParser {
+public abstract  class HtmlParser {
+	protected  static final Logger logger = Logger.getLogger(HtmlParser.class.getName());
 	
-	private DataStorage store;
+	protected DataStorage store;
+	
+	//！ url匹配 pattern
+	protected Pattern pattern;
 	
 	public HtmlParser(DataStorage store){
 		this.store = store;
@@ -57,16 +63,23 @@ public class HtmlParser {
 		
 	}
 	
+	
 	//解析出html中的所有link,筛选过后，放入到UrlQueue中
-	private void obtainLinks(Document doc){
+	protected void obtainLinks(Document doc){
 		Elements links = doc.select("a[href]");
 		Elements media = doc.select("[src]");
 		//Elements imports = doc.select("link[href]");
 		for(Element link: links){
+			
 			//判断该link是否存在抓去价值
-			if(link.attr("abs:href")==null || !link.attr("abs:href").startsWith("http://")){
+			if(link.attr("abs:href")==null || !(link.attr("abs:href").startsWith("http://") || link.attr("abs:href").startsWith("https://"))){
 				//还可以继续判断
 				
+				continue;
+			}
+			//判断是否link是否符合 条件
+			if(!checkUrl(link.attr("abs:href"))){
+				logger.info("不符合link:"+link.attr("abs:href"));
 				continue;
 			}
 			System.out.println("获取link: " + link.attr("abs:href") +"  " +link.attr("rel"));
@@ -80,9 +93,7 @@ public class HtmlParser {
 				UrlQueue.enQueue(link.attr("abs:href"));
 			}
 			
-			
 		}
-		
 		/*for (Element src : media) {
             if (src.tagName().equals("img")){
             	System.out.println(src.tagName());
@@ -96,4 +107,9 @@ public class HtmlParser {
             }
         }*/
 	}
+	
+	/**
+	 * 判断url是否符合格式
+	 */
+	abstract protected boolean checkUrl(String url);
 }
